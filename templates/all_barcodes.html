@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+<!--<link rel="stylesheet" type="text/css" href="static/styles/style.css">-->
+<link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+<meta charset="UTF-8">
+
+<script>
+    // document.getElementById("generate-button").addEventListener("click", stockToIMEI, false);
+
+    // function getSubstring(str) {
+    //     let result = '';
+    //     try {
+    //         for (let i = str.length - 1; i >= 0; i--) {
+    //             if (str[i] === ' ' && str[i - 1] === ' ' && str[i - 2] === ' ') {
+    //                 break;
+    //             }
+    //             result = str[i] + result;
+    //         }
+    //     }
+    //     catch(err) {
+    //         result = str;
+    //     }
+
+    //     return result;
+    // }
+
+
+    function getSubstring(str) {
+        // console.log(str);
+        let index = 0;
+        try {
+            let space = false;
+            for (let i = 0; i < str.length; i++) {
+                if (str[i] === ' ' && space === false) {
+                    space = true;
+                }
+                else if (str[i] !== ' ' && space === true) {
+                    index = i;
+                    // console.log(i);
+                    // console.log(index);
+                    break;
+                }
+            }
+        }
+        catch(err) {
+            return str;
+        }
+
+        return str.slice(index);
+    }
+
+
+
+    function stockToIMEI() {
+        var stockStr = document.getElementById("input").value;
+        let output_str = '';
+        try {
+        //   var description_regex = /^(?!\s)(?!\bIMEI\/Serials\b)\S+\s+([^\n\r]*[^\s]{3})/gm;
+            var description_regex = /^(?!\s)(?!\bIMEI\/Serials\b)(?:\S+\s+){2}([^\n\r]*[^\s]{3})/gm;
+            const quantity_regex = /^(?![\t\s]|IMEI\/Serials).*?\b(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})\s*$/gm;
+            const imei_regex = /\b\d{15}\b/gm;
+
+
+            const desc_matches_temp = stockStr.match(description_regex);
+            const desc_matches = [];
+            const quan_matches = stockStr.matchAll(quantity_regex);
+            const imei_matches = stockStr.match(imei_regex);
+        //   console.log(desc_matches);
+            for (let i=0;i<desc_matches_temp.length;i++) {
+                desc_matches.push(getSubstring(desc_matches_temp[i]));
+            }
+            console.log(desc_matches);
+            console.log(desc_matches.length);
+            console.log(quan_matches);
+            console.log(quan_matches.length);
+            console.log(imei_matches);
+            console.log(imei_matches.length);
+
+            const quantities = [];
+            for (const q of quan_matches) {
+                quantities.push(parseInt(q[3]));
+            }
+
+            let imei_count = 0;
+            for (let i = 0; i < desc_matches.length; i++) {
+                const device = desc_matches[i];
+                const quantity = quantities[i];
+                for (let j = 0; j < quantity; j++) {
+                    output_str += `${imei_matches[imei_count]}\n${device}\n`;
+                        // console.log(imei_matches[imei_count]);
+                        // console.log(device);
+                    imei_count += 1;
+                }
+            }
+
+            output_str = output_str.slice(0, -1);
+        }
+        catch(err) {
+            output_str = err.message;
+        }
+
+        document.getElementById("output").value = output_str;
+    }
+
+
+    function copyToClipboard() {
+        // Get the text field
+        var copyText = document.getElementById("output");
+
+        // Select the text field
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // For mobile devices
+
+        // Copy the text inside the text field
+        navigator.clipboard.writeText(copyText.value);
+    }
+
+</script>
+
+<head>
+    <title>Stock to Text Guide</title>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: #fff;
+            flex-wrap: wrap;
+        }
+
+        .list {
+            list-style-type: decimal;
+            text-align: left;
+            margin: 20px 395px;
+            padding: 0;
+            margin-bottom: 0;
+            flex-basis: 100px;
+        }
+
+        .textarea {
+            flex-basis: calc(50% - 10px);
+            box-sizing: border-box;
+            padding: 10px;
+            margin: 0 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+        }
+
+        .textarea-container {
+            padding: 10px;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .button {
+            display: block;
+            margin: 10px auto 0;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Stock to Text Guide</h1>
+    <div>
+        <ol class="list">
+            <li>Login to Back Office Pronto</li>
+            <li>Click on <strong>Inventory</strong> -> <strong>User Inventory Programs</strong> -> <strong>Retail Store Inventory On Hand</strong></li>
+            <li>Leave <strong>Start Stock Code</strong> blank</li>
+            <li>Enter the following numbers for different devices into <strong>Start Stock Group</strong>:</li>
+            <ul>
+                <li><strong>3201</strong> - Phones</li>
+                <li><strong>3299</strong> - Demo Devices</li>
+                <li><strong>7001</strong> - Modems</li>
+                <li><strong>8300</strong> - Wearables</li>
+            </ul>
+            <li>Keep pressing <em>Enter</em>, this will generate a stock report for your Warehouse</li>
+            <li>Continue waiting until you can press the <strong>Export</strong> button at the top of the report</li>
+            <li>Press <strong>OK</strong> and then <strong>Finish</strong>. This will open Excel with a list of Devices and IMEIs</li>
+            <li>Right click on Column A -> <strong>Format Cells...</strong></li>
+            <li>On the left, under <strong>Category</strong> click on <strong>Number</strong>, set <strong>Decimal Places</strong> to 0 and ensure <strong>Use 1000 Separator is unchecked</strong>. Press <strong>OK</strong></li>
+            <li>Right click on Column A again, and select <strong>Copy</strong></li>
+            <li>Paste into the text box below on the left, and press <strong>Generate</strong></li>
+            <li>You can now copy this text, and paste it in <a href="/">imei.andrei.com.au</a></li>
+
+        </ol>
+        <form>
+            <div class="container">
+                <div class="textarea-container">
+                    <textarea name="data" id="input" rows="20" cols="60" class="textarea" placeholder="Paste here..."></textarea>
+                    <div class="button-container">
+                        <button type="button" class="button" onclick="stockToIMEI()">Generate</button>
+                    </div>
+                </div>
+                <div class="textarea-container">
+                    <textarea name="output" id="output" rows="20" cols="60" class="textarea" readonly></textarea>
+                    <div class="button-container">
+                        <button type="button" class="button" onclick="copyToClipboard()">Copy to Clipboard</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    <br>
+    <br>
+    </div>
+</body>
+
+<!--<footer>-->
+<!--    <p>If there are any issues with the website, email me at <a href="mailto:me@andrei.com.au">me@andrei.com.au</a>, or just tell me in person lol</p>-->
+<!--    <p>IMEI Barcode Generator by Andrei Agnew (and ChatGPT i guess)</p>-->
+<!--</footer>-->
+</html>

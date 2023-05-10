@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+<!--<link rel="stylesheet" type="text/css" href="static/styles/style.css">-->
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+    <meta charset="UTF-8">
+    <title>IMEI Barcode Generator</title>
+</head>
+
+<body>
+    <h1>IMEI Phone Name Barcode Generator</h1>
+    <div class="content">
+        <form action="/sent" method="POST">
+            <label for="data">Enter IMEI followed by phone name on next line</label>
+            <textarea name="data" id="input" rows="20" cols="60" placeholder="IMEI&#13;&#10;Phone Name&#13;&#10;IMEI&#13;&#10;Phone Name&#13;&#10;and so on..."></textarea>
+
+            <label for="size">Select size:</label>
+            <select name="size" id="size">
+                <option value="4">Small (4 per page)</option>
+                <option value="3">Medium (3 per page)</option>
+                <option value="2">Large (2 per page)</option>
+            </select>
+
+            <button class="button">Done</button>
+        </form>
+    <br>
+    <br>
+    <br>
+    If you need help generating barcodes for all your stock for the first time, go to <a href="/helper">imei.andrei.com.au/helper</a> for tools and instructions.
+    </div>
+</body>
+<footer>
+    <p>If there are any issues with the website, email me at <a href="mailto:me@andrei.com.au">me@andrei.com.au</a>, or just tell me in person lol</p>
+    <p>IMEI Barcode Generator by Andrei Agnew (and ChatGPT i guess)</p>
+</footer>
+</html>
