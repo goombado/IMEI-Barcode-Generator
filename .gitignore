@@ -1,4 +1,0 @@
-.gitignore
-tokens.json
-output/*
-__pycache__/*
