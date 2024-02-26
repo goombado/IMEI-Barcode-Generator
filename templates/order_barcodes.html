@@ -6,94 +6,61 @@
 <meta charset="UTF-8">
 
 <script>
-
-    function getSubstring(str) {
-        // console.log(str);
-        let index = 0;
-        try {
-            let space = false;
-            for (let i = 0; i < str.length; i++) {
-                if (str[i] === ' ' && space === false) {
-                    space = true;
-                }
-                else if (str[i] !== ' ' && space === true) {
-                    index = i;
-                    // console.log(i);
-                    // console.log(index);
-                    break;
-                }
-            }
+    function validOrderNumber(order) {
+        if (parseInt(order) === NaN) {
+            return false;
         }
-        catch(err) {
-            return str;
-        }
-
-        return str.slice(index);
+        return true;
     }
 
 
+    function validateInput() {
+        var stockText = document.getElementById("input");
+        var orderText = document.getElementById("order_input");
+        var stockErrorText = document.getElementById("stockErrorText");
+        var orderErrorText = document.getElementById("orderErrorText");
+        var output = document.getElementById("output");
 
-    // function stockToIMEI() {
-    //     var stockStr = document.getElementById("input").value;
-    //     let output_str = '';
-    //     try {
-    //     //   var description_regex = /^(?!\s)(?!\bIMEI\/Serials\b)\S+\s+([^\n\r]*[^\s]{3})/gm;
-    //         var description_regex = /^(?!\s)(?!\bIMEI\/Serials\b)(?:\S+\s+){2}([^\n\r]*[^\s]{3})/gm;
-    //         const quantity_regex = /^(?![\t\s]|IMEI\/Serials).*?\b(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})\s*$/gm;
-    //         const imei_regex = /\b\d{15}\b/gm;
+        stockText.classList.remove("error");
+        orderText.classList.remove("error");
+        stockErrorText.hidden = true;
+        orderErrorText.hidden = true;
 
+        if (stockText.value === "" || orderText.value.length !== 6 || !(validOrderNumber(orderText.value))) {
+            // Add error class to invalid inputs
+            if (stockText.value === "") {
+                stockText.classList.add("error");
+                stockErrorText.hidden = false;
+            }
+            if (orderText.value.length !== 6 || !(validOrderNumber(orderText.value))) {
+                orderText.classList.add("error");
+                orderErrorText.hidden = false;
+            }
 
-    //         const desc_matches_temp = stockStr.match(description_regex);
-    //         const desc_matches = [];
-    //         const quan_matches = stockStr.matchAll(quantity_regex);
-    //         const imei_matches = stockStr.match(imei_regex);
-    //     //   console.log(desc_matches);
-    //         for (let i=0;i<desc_matches_temp.length;i++) {
-    //             desc_matches.push(getSubstring(desc_matches_temp[i]));
-    //         }
-    //         console.log(desc_matches);
-    //         console.log(desc_matches.length);
-    //         console.log(quan_matches);
-    //         console.log(quan_matches.length);
-    //         console.log(imei_matches);
-    //         console.log(imei_matches.length);
+            output.value = "";
+            return false;
+        }
 
-    //         const quantities = [];
-    //         for (const q of quan_matches) {
-    //             quantities.push(parseInt(q[3]));
-    //         }
+        return true;
+    }
 
-    //         let imei_count = 0;
-    //         for (let i = 0; i < desc_matches.length; i++) {
-    //             const device = desc_matches[i];
-    //             const quantity = quantities[i];
-    //             for (let j = 0; j < quantity; j++) {
-    //                 output_str += `${imei_matches[imei_count]}\n${device}\n`;
-    //                     // console.log(imei_matches[imei_count]);
-    //                     // console.log(device);
-    //                 imei_count += 1;
-    //             }
-    //         }
-
-    //         output_str = output_str.slice(0, -1);
-    //     }
-    //     catch(err) {
-    //         output_str = err.message;
-    //     }
-
-    //     document.getElementById("output").value = output_str;
-
-    function stockToIMEI() {
+    function orderStockToIMEI() {
         const DESCRIPTION_OFFSET = 29
         const DESCRIPTION_END = 89
         const IMEI_OFFSET = 29
         const IMEI_LEN = 15
         const DATE_OFFSET = 64
         const DATE_LEN = 11
+        const ORDER_OFFSET = 80
+        const ORDER_LEN = 6
         const QUANTITY_OFFSET = 129
-        const FINISH_OFFSET = 72
+
+        if (!(validateInput())) {
+            return;
+        }
 
         var stockStr = document.getElementById("input").value;
+        var order = document.getElementById("order_input").value;
         const stockArr = stockStr.split("\n");
         var output_str = '';
         var i = -1;
@@ -105,10 +72,6 @@
             while (i < stockArr.length) {
                 i++;
                 l = stockArr[i];
-                if (l.slice(0, FINISH_OFFSET).trim() === '') {
-                    break;
-                }
-
                 desc = l.slice(DESCRIPTION_OFFSET, DESCRIPTION_END).trim();
                 quan = parseInt(l[QUANTITY_OFFSET]);
 
@@ -121,13 +84,17 @@
                 for (let j=0;j<quan;j++) {
                     i++;
                     l = stockArr[i];
-                    let imei = l.slice(IMEI_OFFSET, IMEI_OFFSET+IMEI_LEN)
-                    output_str += `${imei}\n${desc}\n`
+                    let this_order = l.slice(ORDER_OFFSET, ORDER_OFFSET+ORDER_LEN);
+                    if (this_order === order) {
+                        let imei = l.slice(IMEI_OFFSET, IMEI_OFFSET+IMEI_LEN)
+                        output_str += `${imei}\n${desc}\n`
+                    }
                 }
             }
         } catch(err) {
 
         }
+
 
         document.getElementById("output").value = output_str.slice(0, -1);
     }
@@ -144,11 +111,11 @@
         // Copy the text inside the text field
         navigator.clipboard.writeText(copyText.value);
     }
-
 </script>
 
+
 <head>
-    <title>Stock to Text Guide</title>
+    <title>Stock from Order</title>
     <style>
         body {
             box-sizing: border-box;
@@ -205,7 +172,7 @@
 </head>
 
 <body>
-    <h1>Stock to Text Guide</h1>
+    <h1>Stock from Order</h1>
     <h3>NOTE: For privacy reasons, no data is sent to any external servers. All generation is done on the device itself.</h3>
     <div>
         <ol class="list">
@@ -223,16 +190,20 @@
             <li>Press the <strong>Export</strong> button at the top of the report</li>
             <li>Press <strong>OK</strong> and then <strong>Finish</strong>. This will open Excel with a list of Devices and IMEIs</li>
             <li>Right click on Column A, and select <strong>Copy</strong></li>
-            <li>Paste into the text box below on the left, and press <strong>Generate</strong></li>
+            <li>Paste into the text box below on the left, and type the six digit order number in the box below it. Press <strong>Generate</strong></li>
             <li>You can now copy this text, and paste it in <a href="/">imei.andrei.com.au</a></li>
 
         </ol>
         <form>
             <div class="container">
                 <div class="textarea-container">
-                    <textarea name="data" id="input" rows="20" cols="60" class="textarea" placeholder="Paste here..."></textarea>
+                    <p class="error-text" id="stockErrorText" hidden="true">Stock field should not be empty</p>
+                    <textarea name="data" id="input" rows="17" cols="60" class="textarea" placeholder="Paste here..."></textarea>
                     <div class="button-container">
-                        <button type="button" class="button" onclick="stockToIMEI()">Generate</button>
+                        <br>
+                        <p class="error-text" id="orderErrorText" hidden="true">Order should be a 6-digit number</p>
+                        <textarea name="data" id="order_input" rows="1" cols="60" class="textarea" placeholder="Type order number here..."></textarea>
+                        <button type="button" class="button" onclick="orderStockToIMEI()">Generate</button>
                     </div>
                 </div>
                 <div class="textarea-container">

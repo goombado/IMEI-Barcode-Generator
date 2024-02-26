@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+<!--<link rel="stylesheet" type="text/css" href="static/styles/style.css">-->
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
+    <meta charset="UTF-8">
+    <title>IMEI Barcode Generator</title>
+</head>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/barcodes/JsBarcode.code128.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/g/filesaver.js"></script>
+
+
+<script>
+    const FONT_SIZE = {
+        4: 150,
+        3: 200,
+        2: 250
+    };
+    const WIDTH_DICT = {
+        4: 1.1,
+        3: 1.6,
+        2: 2.1
+    };
+    const HTML_HEADER = `<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            table, th, td {
+                border: 0.5px solid black;
+                border-collapse: collapse;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            th, td {
+                padding-bottom: 0.2rem;
+            }
+
+            img {
+                padding: 0.25rem 0 0 0;
+            }
+        </style>
+    </head>
+<body>
+<center>
+<table style='font-family:"sans-serif", Verdana, monospace; font-weight: 500; font-size:60%; width:90%'>`
+
+
+
+    function generateCode128BarcodeBase64(imei, displayText, cols) {
+        // Create a temporary canvas element
+        var canvas = document.createElement('canvas');
+
+        // Generate the barcode using JsBarcode library
+        JsBarcode(canvas, imei, {
+            format: 'CODE128',
+            width: 20,
+            height: 300,
+            fontSize: FONT_SIZE[cols],
+            textMargin: 25
+        });
+
+        // Convert the canvas image to base64
+        var base64 = canvas.toDataURL();
+        // var base64 = img.toDataURL();
+
+        // Extract only the base64 data part
+        var base64Data = base64.split(',')[1];
+
+        return base64Data;
+    }
+
+
+    function formToIMEINames() {
+        var str = document.getElementById("input").value;
+        var str = str.replace('\r', '');
+        var imei_list = str.split('\n');
+        var imei_names = {};
+
+        if (imei_list.length % 2 === 1) {
+            imei_list = imei_list.slice(0, -1);
+        }
+
+        for (let i=0;i<imei_list.length;i++) {
+            if (i % 2 === 0) {
+                imei_names[imei_list[i]] = imei_list[i+1];
+            }
+        }
+
+        return imei_names;
+    }
+
+
+    function createBase64Dict(imei_names, cols) {
+        var imei_base64 = {}
+        for (const [key, value] of Object.entries(imei_names)) {
+            let b64 = generateCode128BarcodeBase64(key, value, cols);
+            imei_base64[key] = b64;
+        }
+
+        return imei_base64;
+    }
+
+
+    function htmlWrite(imei_names, imei_base64, cols) {
+        var html_str = HTML_HEADER;
+        var imeis = Object.keys(imei_names);
+        let i;
+        for (i=0; i<imeis.length; i++) {
+            let imei = imeis[i];
+            let temp = '';
+
+            if (i % cols === 0) {
+                temp += `<tr nobr="true">\n`
+            }
+
+            temp += `<td style=\"text-align:center\"><img src='data:image/jpeg;base64,${imei_base64[imei]}'; `;
+            temp += `width=${100*WIDTH_DICT[cols]} /><br><b>${imei_names[imei]}</b></td>\n`;
+
+            if (i % cols === cols - 1) {
+                temp += "</tr>\n";
+            }
+
+            html_str += temp;
+        }
+
+        if (i !== 0 && i < cols) {
+            for (let j=0;j<i;j++) {
+                html_str += "<td style=\"text-align:center\"></td>";
+            }
+        }
+
+        if (i % cols !== cols - 1) {
+            html_str += "</tr>\n"
+        }
+
+        html_str += "</table>\n";
+        html_str += "\n</body>\n</html>";
+
+        return html_str;
+    }
+
+
+    function getCurrentDateTime() {
+        var now = new Date();
+
+        var year = now.getFullYear();
+        var month = String(now.getMonth() + 1).padStart(2, '0');
+        var day = String(now.getDate()).padStart(2, '0');
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        var seconds = String(now.getSeconds()).padStart(2, '0');
+
+        var formattedDateTime = `"IMEI_${day}${month}${year}_${hours}${minutes}${seconds}`;
+
+        return formattedDateTime;
+    }
+
+
+    function downloadHtmlAsPdf(htmlString) {
+        // Create a temporary element to hold the HTML content
+        var tempElement = document.createElement('div');
+        tempElement.innerHTML = htmlString;
+        var fileName = getCurrentDateTime();
+        // // Generate the PDF using html2pdf library
+        // html2pdf().from(tempElement).save(fileName + '.pdf');
+
+        html2pdf(tempElement, {
+            margin:       [0.4, 0.2, 0.2, 0.2],
+            filename:     fileName,
+            image:        { type: 'jpeg', quality: 1 },
+            html2canvas:  { scale: 4, letterRendering: true },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'p' },
+            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+        });
+    }
+
+
+    function main() {
+        var imei_names = formToIMEINames();
+        var cols = parseInt(document.getElementById("size").value);
+        var imei_base64 = createBase64Dict(imei_names, cols);
+        var html_str = htmlWrite(imei_names, imei_base64, cols);
+        downloadHtmlAsPdf(html_str);
+
+        return false;
+    }
+
+</script>
+
+
+
+<body>
+    <h1>IMEI Phone Name Barcode Generator</h1>
+    <h3>NOTE: For privacy reasons, no data is sent to any external servers. All barcode generation is done on the device itself.</h3>
+    <div class="content">
+        <form>
+            <label for="data">Enter IMEI followed by phone name on next line</label>
+            <textarea name="data" id="input" rows="20" cols="60" placeholder="IMEI&#13;&#10;Phone Name&#13;&#10;IMEI&#13;&#10;Phone Name&#13;&#10;and so on..."></textarea>
+
+            <label for="size">Select size:</label>
+            <select name="size" id="size">
+                <option value="4">Small (4 per page)</option>
+                <option value="3" selected>Medium (3 per page)</option>
+                <option value="2">Large (2 per page)</option>
+            </select>
+
+            <button class="button" type="button" onclick="main()">Done</button>
+        </form>
+    <br>
+    <br>
+    <br>
+    If you would like to generate barcodes for all devices from a specific warehouse order, go to <a href="/order">imei.andrei.com.au/order</a>.
+    <br>
+    <br>
+    If you need help generating barcodes for all your stock for the first time, go to <a href="/helper">imei.andrei.com.au/helper</a>.
+    </div>
+</body>
+<!--<footer>-->
+<!--    <p>If there are any issues with the website, email me at <a href="mailto:me@andrei.com.au">me@andrei.com.au</a>, or just tell me in person lol</p>-->
+<!--    <p>IMEI Barcode Generator by Andrei Agnew</p>-->
+<!--</footer>-->
+</html>

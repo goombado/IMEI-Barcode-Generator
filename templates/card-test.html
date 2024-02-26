@@ -1,0 +1,112 @@
+<!--<head>-->
+<!--    <link rel="stylesheet" href="/reference/sdks/web/static/styles/code-preview.css" preload>-->
+<!--    <script src="https://sandbox.web.squarecdn.com/v1/square.js"></script>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <form id="payment-form">-->
+        <!-- Add the below element -->
+<!--        <div style="display: inline-block;-->
+<!--        -webkit-appearance: -apple-pay-button;-->
+<!--        -apple-pay-button-type: plain;-->
+<!--        -apple-pay-button-style: black;"-->
+<!--        lang=en></div>-->
+<!--        <div id="card-container"></div>-->
+<!--        <button id="card-button" type="button">Pay $1.00</button>-->
+<!--    </form>-->
+<!--    <div id="payment-status-container"></div>-->
+<!--<script type="module">-->
+<!--    const payments = Square.payments('sandbox-sq0idb-o5v_XiUzsLhnbLgmQqEPqA', 'LTM31B2PAM6TZ');-->
+    // const card = await payments.card();
+    // const applePay = await payments.applePay();
+    // await card.attach('#card-container');
+    // await applePay.attach('#apple-pay-container');
+
+    // const cardButton = document.getElementById('card-button');
+    // const applePayButton = document.getElementById('apple-pay-button');
+
+    // cardButton.addEventListener('click', async () => {
+    // const statusContainer = document.getElementById('payment-status-container');
+
+    // try {
+    //     const result = await card.tokenize();
+    //     if (result.status === 'OK') {
+    //     console.log(`Payment token is ${result.token}`);
+    //     statusContainer.innerHTML = "Payment Successful";
+    //     } else {
+    //     let errorMessage = `Tokenization failed with status: ${result.status}`;
+    //     if (result.errors) {
+    //         errorMessage += ` and errors: ${JSON.stringify(
+    //         result.errors
+    //         )}`;
+    //     }
+
+    //     throw new Error(errorMessage);
+    //     }
+    // } catch (e) {
+    //     console.error(e);
+    //     statusContainer.innerHTML = "Payment Failed";
+    // }
+    // });
+<!--    function buildPaymentRequest(payments) {-->
+<!--        return payments.paymentRequest({-->
+<!--            countryCode: 'US',-->
+<!--            currencyCode: 'USD',-->
+<!--            total: {-->
+<!--            amount: '1.00',-->
+<!--            label: 'Total',-->
+<!--            },-->
+<!--        });-->
+<!--    }-->
+
+<!--    async function initializeApplePay(payments) {-->
+<!--        const paymentRequest = buildPaymentRequest(payments)-->
+<!--        const applePay = await payments.applePay(paymentRequest);-->
+        // Note: You don't need to `attach` applePay.
+<!--        return applePay;-->
+<!--    }-->
+
+<!--    let applePay;-->
+<!--    try {-->
+<!--        applePay = await initializeApplePay(payments);-->
+<!--    } catch (e) {-->
+<!--        console.error('Initializing Apple Pay failed', e);-->
+    // There are a number of reason why Apple Pay might not be supported.
+    // (such as Browser Support, Device Support, Account). Therefore you should
+    // handle
+    // initialization failures, while still loading other applicable payment
+    // methods.
+<!--    }-->
+
+
+<!--</script>-->
+<!--</body>-->
+
+
+<div style="
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  width: 259px;
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: -2px 10px 5px rgba(0, 0, 0, 0);
+  border-radius: 10px;
+  font-family: SQ Market, Helvetica, Arial, sans-serif;
+  ">
+  <div style="padding: 20px;">
+    <a target="_blank" href="https://square.link/u/yxiDUDWB?src=embed" style="
+    display: inline-block;
+    font-size: 18px;
+    line-height: 48px;
+    height: 48px;
+    color: #ffffff;
+    min-width: 212px;
+    background-color: #000000;
+    text-align: center;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.1) inset;
+
+  ">Buy now</a>
+  </div>
+</div>

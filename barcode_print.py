@@ -159,6 +159,7 @@ class BarcodePrint:
         cropped.thumbnail((int(cropped.width*(width_dict[self.cols])), 10000))
         cropped.save(b2, format="JPEG")
         barcode = encode(b2.getvalue()).decode()
+        # print(cropped.size)
         try:
             image.close()
         except Exception as e:
@@ -199,7 +200,9 @@ class BarcodePrint:
             self.html_text += temp
             i += 1
 
-
+        # print(i)
+        # print(self.cols - i)
+        # print("<td style=\"text-align:center\"></td>" * (self.cols - i))
         self.html_text += "<td style=\"text-align:center\"></td>" * (self.cols - i if i != 0 else 0)
 
         if i % self.cols != (self.cols - 1):
